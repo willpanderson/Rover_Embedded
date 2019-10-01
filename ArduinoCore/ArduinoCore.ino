@@ -1,3 +1,4 @@
+
 /******************************************************************************************************************************************************/
 //                                --[[ HARDWARE SETUP ]]--                                  //
 /******************************************************************************************************************************************************/
@@ -162,7 +163,7 @@ int MotorState [] = {FullStop, FullStop};
 int CurrMotorTgt [] = {FullStop, FullStop};
 
 //                               --[[ GPS & IMU setup ]]--
-/*
+
 #include "Adafruit_GPS.h"
 
 #define IMU_Addr 0x20
@@ -259,7 +260,7 @@ enum ImuAddrMap {
 	float		YawAngle;
 	size_t		GpsTimer;
 	char		c;
-*/
+
 
 //                               --[[ Fan Speed setup ]]--
 
@@ -319,8 +320,8 @@ void PrepReport ()
 //		ReportBuffer [Ctr++] = SRData [j];
 	}
 
-/*
-float ByteToFloat (byte * Input, int & Pos)		// This function is mostly used to convert gps waypoints to useful float data.
+
+/*float ByteToFloat (byte * Input, int & Pos)		// This function is mostly used to convert gps waypoints to useful float data.
 	{
 	float Temp = 0;
 
@@ -329,7 +330,7 @@ float ByteToFloat (byte * Input, int & Pos)		// This function is mostly used to 
 
 	return Temp;
 	}
-*/
+
 
 bool ParseComms ()
 	{
@@ -406,7 +407,7 @@ bool ParseComms ()
 */
 
 //  GPS & IMU Functions
-/*
+
 SIGNAL (TIMER0_COMPA_vect)
 	{
 	char c = Gps.read ();	// if you want to debug, this is a good time to do it!
@@ -431,7 +432,7 @@ void useInterrupt (bool v)
 				}
 	}
 
-bool IMURead (uint8_t reg_add, uint8_t * buff, uint8_t len)
+/*bool IMURead (uint8_t reg_add, uint8_t * buff, uint8_t len)
 	{
 	Wire.beginTransmission ((uint8_t) IMU_Addr);
 	Wire.write (reg_add);
@@ -545,7 +546,7 @@ bool IMU_Init ()
 //  Drive Functions
 void SetMotorValueTargets ()
 	{
-#ifdef MOTOR_DRIVER_MODE == TANK_MODE
+//#ifdef MOTOR_DRIVER_MODE == TANK_MODE
 	if ((DriveValue + TurnValue - FullStop + LeftMotorCalibration) >= FullForward)
 			CurrMotorTgt [Left] = FullForward;
 		else if ((TurnValue + LeftMotorCalibration) <= FullReverse)
@@ -556,10 +557,10 @@ void SetMotorValueTargets ()
 		else if ((DriveValue + (FullStop - TurnValue) + RightMotorCalibration) >= FullForward)
 				CurrMotorTgt [Right] = FullForward;
 			else CurrMotorTgt [Right] = DriveValue - TurnValue + FullStop + RightMotorCalibration;
-#else
+//#else
     CurrMotorTgt [Left] = DriveValue;
     CurrMotorTgt [Right] = TurnValue;
-#endif
+//#endif
 	}
 
 /******************************************************************************************************************************************************/
@@ -599,9 +600,9 @@ void loop()
 	{
 //	Serial.print ("MotorState [Left] = "); Serial.println (MotorState [0]);
 //	Serial.print ("CurrMotorTgt [Left] = "); Serial.println (CurrMotorTgt [0]);
-    if (ParseComms ());
+//    if (ParseComms ());
 //			Good, continue mission.
-		else if ((millis () - CommCheckTimer) >= 2000)	//	We can't talk with the server anymore.
+//		else if ((millis () - CommCheckTimer) >= 2000)	//	We can't talk with the server anymore.
 				CurrMotorTgt [Left] = CurrMotorTgt [Right] = FullStop;
 
 	GetArmData ();
