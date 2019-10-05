@@ -296,11 +296,11 @@ void PrepReport ()
 
     Ctr = 0;
     ReportBuffer [Ctr++] = SYS_INFO;
-/*
-    FloatBuf = (byte *) & CurrentLocation.LatitudeDegrees;
+
+    FloatBuf = (byte *) & Gps.latitude;
     for (j = 0; j < FloatSize; j++)
       ReportBuffer [Ctr++] = FloatBuf [j];
-    FloatBuf = (byte *) & CurrentLocation.LongitudeDegrees;
+    FloatBuf = (byte *) & Gps.longitude;
     for (j = 0; j < FloatSize; j++)
       ReportBuffer [Ctr++] = FloatBuf [j];
     FloatBuf = (byte *) & RollAngle;
@@ -313,7 +313,7 @@ void PrepReport ()
     for (j = 0; j < FloatSize; j++)
       ReportBuffer [Ctr++] = FloatBuf [j];
 //  ReportBuffer [Ctr++] = TemperatureVal;
-*/
+
 	for (j = 0; j < ArmVars; j++)
 		ReportBuffer [Ctr++] = ArmPos [j];
 //	for (j = 0; j < SRVars; j++)
@@ -431,6 +431,8 @@ void useInterrupt (bool v)
 				usingInterrupt = false;
 				}
 	}
+
+
 
 /*bool IMURead (uint8_t reg_add, uint8_t * buff, uint8_t len)
 	{
@@ -579,16 +581,16 @@ void setup ()
 
     Wire.begin ();
     Wire.write (Reset);
-	/*
+	
     Gps.begin (9600); // This is 9600 so the gps can read its data, and the 115200 baud is for when the gps is writing data.
     Gps.sendCommand (PMTK_SET_NMEA_OUTPUT_RMCGGA);	// We want to account for altitude, so we use parameter: PMTK_SET_NMEA_OUTPUT_RMCGGA
     Gps.sendCommand (PMTK_SET_NMEA_UPDATE_1HZ);		// GPS will check for new location every second
     useInterrupt  (true);
-    */
+    
 
-    //  while (!Gps.fix)  //  Wait until the GPS has a fix
-    //    if (Gps.newNMEAreceived ())
-    //      Gps.parse (Gps.lastNMEA ());
+    //while (!Gps.fix)  //  Wait until the GPS has a fix
+       if (Gps.newNMEAreceived ())
+         Gps.parse (Gps.lastNMEA ());
 
     analogWrite (LeftMotorPin, MotorState [Left]);
     analogWrite (RightMotorPin, MotorState [Right]);
@@ -605,13 +607,17 @@ void loop()
 //		else if ((millis () - CommCheckTimer) >= 2000)	//	We can't talk with the server anymore.
 				CurrMotorTgt [Left] = CurrMotorTgt [Right] = FullStop;
 
+
+   if (Gps.newNMEAreceived ())
+      if (!Gps.parse (Gps.lastNMEA ()));
+   Serial.print ("Lat: "); Serial.print (Gps.latitude); Serial.print (", Lon: "); Serial.println (Gps.longitude);
 	GetArmData ();
 //  GetSRData ();
 //  ControlTemperature ();
     if ((millis () - ReportTimer) >= ReportFrequency)
 		{
         PrepReport ();
-		SendPacket (Ctr, ReportBuffer);
+//		SendPacket (Ctr, ReportBuffer);
         ReportTimer = millis ();
 		}
 
