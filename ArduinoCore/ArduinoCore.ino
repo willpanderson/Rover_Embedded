@@ -1,4 +1,3 @@
-
 /******************************************************************************************************************************************************/
 //                                --[[ HARDWARE SETUP ]]--                                  //
 /******************************************************************************************************************************************************/
@@ -261,7 +260,6 @@ enum ImuAddrMap {
 	size_t		GpsTimer;
 	char		c;
 
-
 //                               --[[ Fan Speed setup ]]--
 
 //                              --[[ Voltage Bus setup ]]--
@@ -320,8 +318,8 @@ void PrepReport ()
 //		ReportBuffer [Ctr++] = SRData [j];
 	}
 
-
-/*float ByteToFloat (byte * Input, int & Pos)		// This function is mostly used to convert gps waypoints to useful float data.
+/*
+float ByteToFloat (byte * Input, int & Pos)		// This function is mostly used to convert gps waypoints to useful float data.
 	{
 	float Temp = 0;
 
@@ -330,7 +328,7 @@ void PrepReport ()
 
 	return Temp;
 	}
-
+*/
 
 bool ParseComms ()
 	{
@@ -432,9 +430,7 @@ void useInterrupt (bool v)
 				}
 	}
 
-
-
-/*bool IMURead (uint8_t reg_add, uint8_t * buff, uint8_t len)
+bool IMURead (uint8_t reg_add, uint8_t * buff, uint8_t len)
 	{
 	Wire.beginTransmission ((uint8_t) IMU_Addr);
 	Wire.write (reg_add);
@@ -519,16 +515,16 @@ int IMUReadQuaternion ()
 	int16_t quat_z = (buf_quat [5] << 8) | buf_quat [4];
 	int16_t quat_w = (buf_quat [7] << 8) | buf_quat [6];
 
-	quaternion_x = (float) quat_x / 32767;
-	quaternion_y = (float) quat_y / 32767;
-	quaternion_z = (float) quat_z / 32767;
-	quaternion_w = (float) quat_w / 32767;
+	quat_x = (float) quat_x / 32767;
+	quat_y = (float) quat_y / 32767;
+	quat_z = (float) quat_z / 32767;
+	quat_w = (float) quat_w / 32767;
 
 	Serial.print ("#QUATERNION = [");
-	Serial.print (quaternion_x);  Serial.print (", ");
-	Serial.print (quaternion_y);  Serial.print (", ");
-	Serial.print (quaternion_z);  Serial.print (", ");
-	Serial.print (quaternion_w);  Serial.println ("]");
+	Serial.print (quat_x);  Serial.print (", ");
+	Serial.print (quat_y);  Serial.print (", ");
+	Serial.print (quat_z);  Serial.print (", ");
+	Serial.print (quat_w);  Serial.println ("]");
 	Serial.println ();
 	}
 
@@ -543,12 +539,11 @@ bool IMU_Init ()
 		return false;
 	return true;
 	}
-*/
 
 //  Drive Functions
 void SetMotorValueTargets ()
 	{
-//#ifdef MOTOR_DRIVER_MODE == TANK_MODE
+#ifdef MOTOR_DRIVER_MODE == TANK_MODE
 	if ((DriveValue + TurnValue - FullStop + LeftMotorCalibration) >= FullForward)
 			CurrMotorTgt [Left] = FullForward;
 		else if ((TurnValue + LeftMotorCalibration) <= FullReverse)
@@ -559,10 +554,10 @@ void SetMotorValueTargets ()
 		else if ((DriveValue + (FullStop - TurnValue) + RightMotorCalibration) >= FullForward)
 				CurrMotorTgt [Right] = FullForward;
 			else CurrMotorTgt [Right] = DriveValue - TurnValue + FullStop + RightMotorCalibration;
-//#else
+#else
     CurrMotorTgt [Left] = DriveValue;
     CurrMotorTgt [Right] = TurnValue;
-//#endif
+#endif
 	}
 
 /******************************************************************************************************************************************************/
@@ -581,20 +576,20 @@ void setup ()
 
     Wire.begin ();
     Wire.write (Reset);
-	
+	/*
     Gps.begin (9600); // This is 9600 so the gps can read its data, and the 115200 baud is for when the gps is writing data.
     Gps.sendCommand (PMTK_SET_NMEA_OUTPUT_RMCGGA);	// We want to account for altitude, so we use parameter: PMTK_SET_NMEA_OUTPUT_RMCGGA
     Gps.sendCommand (PMTK_SET_NMEA_UPDATE_1HZ);		// GPS will check for new location every second
     useInterrupt  (true);
-    
+    */
 
-    //while (!Gps.fix)  //  Wait until the GPS has a fix
-       if (Gps.newNMEAreceived ())
-         Gps.parse (Gps.lastNMEA ());
+    //  while (!Gps.fix)  //  Wait until the GPS has a fix
+	if (Gps.newNMEAreceived ())
+	  Gps.parse (Gps.lastNMEA ());
 
     analogWrite (LeftMotorPin, MotorState [Left]);
     analogWrite (RightMotorPin, MotorState [Right]);
-    MotorDelayTimer /*= GpsTimer*/ = CommCheckTimer = ReportTimer = millis ();
+    MotorDelayTimer = GpsTimer = CommCheckTimer = ReportTimer = millis ();
 }
 
 //                                   --[[ Loop ]]--
@@ -602,22 +597,20 @@ void loop()
 	{
 //	Serial.print ("MotorState [Left] = "); Serial.println (MotorState [0]);
 //	Serial.print ("CurrMotorTgt [Left] = "); Serial.println (CurrMotorTgt [0]);
-//    if (ParseComms ());
+    if (ParseComms ());
 //			Good, continue mission.
-//		else if ((millis () - CommCheckTimer) >= 2000)	//	We can't talk with the server anymore.
+		else if ((millis () - CommCheckTimer) >= 2000)	//	We can't talk with the server anymore.
 				CurrMotorTgt [Left] = CurrMotorTgt [Right] = FullStop;
-
-
-   if (Gps.newNMEAreceived ())
-      if (!Gps.parse (Gps.lastNMEA ()));
-   Serial.print ("Lat: "); Serial.print (Gps.latitude); Serial.print (", Lon: "); Serial.println (Gps.longitude);
+	if ((millis () - GpsTimer) >= 1000)
+		if (Gps.newNMEAreceived ())
+			if (!Gps.parse (Gps.lastNMEA ()));
 	GetArmData ();
 //  GetSRData ();
 //  ControlTemperature ();
     if ((millis () - ReportTimer) >= ReportFrequency)
 		{
         PrepReport ();
-//		SendPacket (Ctr, ReportBuffer);
+		SendPacket (Ctr, ReportBuffer);
         ReportTimer = millis ();
 		}
 
