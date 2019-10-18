@@ -500,12 +500,7 @@ void IMUReadEulerAngle ()
 	PitchAngle = ((float) euler_y * 180 / 32767) + PitchCalibration;	// Nose DOWN is negative, Nose UP is positive (inverted for intuitiveness)
 	YawAngle = ((float) euler_z * 180 / 32767) + YawCalibration;		// Left is negative, Right is positive
 	}
- Serial.print("Roll:");
- Serial.print("RollAngle);
- Serial.print(\t"Pitch:");
- Serial.print(PitchAngle);
- Serial.print(\t"Yaw:");
- Serial.print(YawAngle);
+ 
 //	Read Quaternion
 //	The Quaternion data gives (X)i + (Y)j + (Z)k + (W)
 //		In other words, a 3D vector function
@@ -612,6 +607,14 @@ void loop()
 	GetArmData ();
 //  GetSRData ();
 //  ControlTemperature ();
+IMUReadEulerAngle ();
+  Serial.print("\n\nRoll:");
+ Serial.print(RollAngle);
+ Serial.print("\nPitch:");
+ Serial.print(PitchAngle);
+ Serial.print("\nYaw:");
+ Serial.print(YawAngle);
+ delay(500);
     if ((millis () - ReportTimer) >= ReportFrequency)
 		{
         PrepReport ();
