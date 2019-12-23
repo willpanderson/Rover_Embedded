@@ -100,7 +100,6 @@ SS: GPIO 53 (MEGA 2560) || GPIO 10 (UNO) **CAUTION** [5V] (Raspi is ~3.3V logic)
 #define ControllerLowerLim 0
 #define ReportFrequency 100		// in milliseconds
 
-Global_Definitions Command;
 size_t ReportTimer;
 size_t CommCheckTimer;
 size_t Ctr;
@@ -244,9 +243,9 @@ enum ImuAddrMap {
 	};
 
 #if defined (__AVR_ATmega2560__)			// If the board is an Arduino MEGA
-	Adafruit_GPS  Gps (& Serial1);			// GPS TX -> Mega Pin 19, GPS RX -> Mega Pin 18
+	Adafruit_GPS  Gps (& Serial1);			//		GPS TX -> Mega Pin 19, GPS RX -> Mega Pin 18
 #elif defined (__AVR_ATmega328P__)			// If the board is an Arduino UNO (I test at home on an UNO.)
-	SoftwareSerial  GPSReadChannel (3, 2);	// First param is the Arduino TX pin, Second param is the Arduino RX pin.
+	SoftwareSerial  GPSReadChannel (3, 2);	//		First param is the Arduino TX pin, Second param is the Arduino RX pin.
 	Adafruit_GPS  Gps (& GPSReadChannel);
 #endif
 
@@ -259,6 +258,27 @@ enum ImuAddrMap {
 	float		YawAngle;
 	size_t		GpsTimer;
 	char		c;
+
+//									--[[ LED setup ]]--
+
+#include "Adafruit_NeoPixel.h"
+
+#define LEDPin 13
+#define NumPixels 7
+#define LEDDelay 500	// time in milliseconds
+#define WaypointCompleteBlinkPeriod 5000
+
+Adafruit_NeoPixel LED (NumPixels, LEDPin, NEO_RGB + NEO_KHZ800);  // NEO_GRB means the color data is {R, G, B}. NEO_KHZ800 means we send colors as a byte array.
+#define Red(l) l.Color(255, 0, 0)
+#define Green(l) l.Color(0, 255, 0)
+#define Blue(l) l.Color(0, 0, 255)
+
+enum LEDStates {RED, GREEN, BLUE};
+LEDStates LEDState = BLUE;
+int LEDBrightness = 255;
+
+size_t LEDTimer;
+size_t LegTimer;
 
 //                               --[[ Fan Speed setup ]]--
 
@@ -301,7 +321,7 @@ void PrepReport ()
     FloatBuf = (byte *) & Gps.longitude;
     for (j = 0; j < FloatSize; j++)
       ReportBuffer [Ctr++] = FloatBuf [j];
-    FloatBuf = (byte *) & RollAngle;
+/*    FloatBuf = (byte *) & RollAngle;
     for (j = 0; j < FloatSize; j++)
       ReportBuffer [Ctr++] = FloatBuf [j];
     FloatBuf = (byte *) & PitchAngle;
@@ -311,7 +331,7 @@ void PrepReport ()
     for (j = 0; j < FloatSize; j++)
       ReportBuffer [Ctr++] = FloatBuf [j];
 //  ReportBuffer [Ctr++] = TemperatureVal;
-
+*/
 	for (j = 0; j < ArmVars; j++)
 		ReportBuffer [Ctr++] = ArmPos [j];
 //	for (j = 0; j < SRVars; j++)
@@ -332,13 +352,47 @@ float ByteToFloat (byte * Input, int & Pos)		// This function is mostly used to 
 
 bool ParseComms ()
 	{
+	Global_Definitions Command;
     int PayloadSize = 0;
     if (LookForPacket (ReadBuffer) == 0) // If this channel has no data coming in...
-        return false; //  ...don't waste our time processing.
+        return false; //  ...don't waste our time processing.	
 
     Command = (Global_Definitions) ReadBuffer [0];
     switch (Command)
 		{
+		case AUTOPILOT:
+			switch (LEDState)
+				{
+				case GREEN:
+				case RED:
+					LEDState = BLUE;
+					if (LEDBrightness != 255)
+						{
+						LEDBrightness = 255;
+						LED.setBrightness (LEDBrightness);
+						}
+					for (int i = 0; i < NumPixels; i++)
+						LED.setPixelColor (i, Blue(LED));
+					break;
+				case BLUE:
+					LEDState = RED;
+					if (LEDBrightness != 255)
+						{
+						LEDBrightness = 255;
+						LED.setBrightness (LEDBrightness);
+						}
+					for (int i = 0; i < NumPixels; i++)
+						LED.setPixelColor (i, Red(LED));
+					break;
+				}
+			break;
+		case LEG_COMPLETE:
+			LEDState = GREEN;
+			for (int i = 0; i < NumPixels; i++)
+				LED.setPixelColor (i, Green(LED));
+			LED.show ();
+			LegTimer = millis ();
+			break;
 		case DRIVE:
 			digitalWrite (MotorTogglePin, HIGH);	// Enable the motors
 		    DriveValue = ReadBuffer [1];
@@ -372,7 +426,7 @@ bool ParseComms ()
 		    Temp [0] = COMM_PING;
 		    SendPacket (1, Temp);
 		    break;
-		defualt:
+		default:
 			return false;
 		}
 	CommCheckTimer = millis ();
@@ -500,10 +554,11 @@ void IMUReadEulerAngle ()
 	PitchAngle = ((float) euler_y * 180 / 32767) + PitchCalibration;	// Nose DOWN is negative, Nose UP is positive (inverted for intuitiveness)
 	YawAngle = ((float) euler_z * 180 / 32767) + YawCalibration;		// Left is negative, Right is positive
 	}
- 
+
 //	Read Quaternion
 //	The Quaternion data gives (X)i + (Y)j + (Z)k + (W)
 //		In other words, a 3D vector function
+/*
 int IMUReadQuaternion ()
 	{
 	uint8_t buf_quat [8];
@@ -515,18 +570,19 @@ int IMUReadQuaternion ()
 	int16_t quat_z = (buf_quat [5] << 8) | buf_quat [4];
 	int16_t quat_w = (buf_quat [7] << 8) | buf_quat [6];
 
-	quat_x = (float) quat_x / 32767;
-	quat_y = (float) quat_y / 32767;
-	quat_z = (float) quat_z / 32767;
-	quat_w = (float) quat_w / 32767;
+	quaternion_x = (float) quat_x / 32767;
+	quaternion_y = (float) quat_y / 32767;
+	quaternion_z = (float) quat_z / 32767;
+	quaternion_w = (float) quat_w / 32767;
 
 	Serial.print ("#QUATERNION = [");
-	Serial.print (quat_x);  Serial.print (", ");
-	Serial.print (quat_y);  Serial.print (", ");
-	Serial.print (quat_z);  Serial.print (", ");
-	Serial.print (quat_w);  Serial.println ("]");
+	Serial.print (quaternion_x);  Serial.print (", ");
+	Serial.print (quaternion_y);  Serial.print (", ");
+	Serial.print (quaternion_z);  Serial.print (", ");
+	Serial.print (quaternion_w);  Serial.println ("]");
 	Serial.println ();
 	}
+*/
 
 bool IMU_Init ()
 	{
@@ -567,29 +623,38 @@ void SetMotorValueTargets ()
 //                                  --[[ Setup ]]--
 void setup ()
 	{
+/*	Initialize Motors	*/
 	pinMode (MotorTogglePin, OUTPUT);
 	digitalWrite (MotorTogglePin, LOW);
-    Serial.begin (115200); // This is 115200 so that the GPS doesn't miss any data
-    Serial.flush ();
 	TCCR1B &= ~7;	//	These two lines manipulate the PWM registers for our motor pins
 	TCCR1B |= 2;	//		It's now set to operate at 3900 Hz for the Sabertooth 2x25
+	analogWrite (LeftMotorPin, MotorState [Left]);
+	analogWrite (RightMotorPin, MotorState [Right]);
+
+/*	Initialize Communications	*/
+	Serial.begin (115200); // This is 115200 so that the GPS doesn't miss any data
+	Serial.flush ();
 
     Wire.begin ();
     Wire.write (Reset);
-	/*
+
+/*	Initialize GPS	*/
     Gps.begin (9600); // This is 9600 so the gps can read its data, and the 115200 baud is for when the gps is writing data.
     Gps.sendCommand (PMTK_SET_NMEA_OUTPUT_RMCGGA);	// We want to account for altitude, so we use parameter: PMTK_SET_NMEA_OUTPUT_RMCGGA
     Gps.sendCommand (PMTK_SET_NMEA_UPDATE_1HZ);		// GPS will check for new location every second
     useInterrupt  (true);
-    */
 
     //  while (!Gps.fix)  //  Wait until the GPS has a fix
 	if (Gps.newNMEAreceived ())
 	  Gps.parse (Gps.lastNMEA ());
 
-    analogWrite (LeftMotorPin, MotorState [Left]);
-    analogWrite (RightMotorPin, MotorState [Right]);
-    MotorDelayTimer = GpsTimer = CommCheckTimer = ReportTimer = millis ();
+/*	Initialize LED	*/
+	LED.clear ();
+	LED.setBrightness (LEDBrightness);
+	LED.begin ();
+
+/*	Initialize Timers	*/
+    MotorDelayTimer = GpsTimer = CommCheckTimer = ReportTimer = LEDTimer = millis ();
 }
 
 //                                   --[[ Loop ]]--
@@ -597,25 +662,47 @@ void loop()
 	{
 //	Serial.print ("MotorState [Left] = "); Serial.println (MotorState [0]);
 //	Serial.print ("CurrMotorTgt [Left] = "); Serial.println (CurrMotorTgt [0]);
+
+//***************************************************
+//			-- Parse Comms --
+//***************************************************
     if (ParseComms ());
 //			Good, continue mission.
 		else if ((millis () - CommCheckTimer) >= 2000)	//	We can't talk with the server anymore.
 				CurrMotorTgt [Left] = CurrMotorTgt [Right] = FullStop;
+
+//***************************************************
+//			-- Read Sensors --
+//***************************************************
+	if (LEDState == GREEN)
+		{
+		if (millis () - LEDTimer >= LEDDelay)	// This "if" statement makes the GREEN light blink.
+			{
+			LEDBrightness = 255 - LEDBrightness;
+			LED.setBrightness (LEDBrightness);
+			for (int i = 0; i < NumPixels; i++)
+				LED.setPixelColor (i, Green(LED));
+			}
+		if (millis () - LegTimer >= WaypointCompleteBlinkPeriod)
+			{
+			LEDState = RED;
+			for (int i = 0; i < NumPixels; i++)
+				LED.setPixelColor (i, Red(LED));
+			}
+		}
+	LED.show ();
+
 	if ((millis () - GpsTimer) >= 1000)
 		if (Gps.newNMEAreceived ())
 			if (!Gps.parse (Gps.lastNMEA ()));
 	GetArmData ();
 //  GetSRData ();
 //  ControlTemperature ();
-IMUReadEulerAngle ();
-  Serial.print("\n\nRoll:");
- Serial.print(RollAngle);
- Serial.print("\nPitch:");
- Serial.print(PitchAngle);
- Serial.print("\nYaw:");
- Serial.print(YawAngle);
- delay(500);
-    if ((millis () - ReportTimer) >= ReportFrequency)
+
+//***************************************************
+//			-- Manage Motors --
+//***************************************************
+	if ((millis () - ReportTimer) >= ReportFrequency)
 		{
         PrepReport ();
 		SendPacket (Ctr, ReportBuffer);
@@ -637,6 +724,9 @@ IMUReadEulerAngle ();
 		MotorDelayTimer = millis ();
 		}
 
+//***************************************************
+//			-- Timer Checks --
+//***************************************************
 //	The rover may run for up to an hour. These checks are to make sure we're prepared for millis() to reach max value and flip over.
     if (CommCheckTimer > millis ())
         CommCheckTimer = millis ();

@@ -19,9 +19,10 @@ enum Global_Definitions
 							//		Pi writes (COMM_PING), Arduino responds with (COMM_PING)
 
 	/* Raspi Issuable Commands */
-//	AUTOPILOT		= 0xBA,	// This command no longer used.
+	AUTOPILOT		= 0xBA,
+	LEG_COMPLETE	= 0xB9,
 	DRIVE			= 0xBB,
-	GPS_LOCATION	= 0xBC,	// This value is going to be passed as a pair of floating point values. (4 bytes)
+	GPS_LOCATION	= 0xBC,
 	SAMPLE_RETURN	= 0xBD,
 	ARM				= 0xBE,
 	GPS_LOST		= 0xBF,
