@@ -1,9 +1,12 @@
-void setup() {
-  // put your setup code here, to run once:
+#define MotorDriverA 2
+#define MotorDriverB 3
 
+
+
+void setup() {
+  
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
 }
