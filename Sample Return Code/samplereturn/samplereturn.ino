@@ -20,13 +20,9 @@ int in8 = 12;
 int inData = 20;
 int inClock = 21;
 int motorspeed;
+int drillspeed;
 
 
-
-void HomeState()
-{
-  digital write  
-}
 void setup()
 {
   Serial.begin(9600);
@@ -37,7 +33,7 @@ void setup()
   pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
-
+  
 
   Serial.println("Arduino is ready");
   Serial.println("Enter a number between 0 and 255. Negative numbers reverse direction.");
@@ -69,6 +65,27 @@ void loop()
     analogWrite(enA, rev_speed);
     delay(5000);
     analogWrite(enB, rev_speed);
+  }
+  if (drillspeed >= 0 && drillspeed <= 255) {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, LOW);
+    analogWrite(enA, motorspeed);
+    delay(3000);
+    analogWrite(enB, motorspeed);
+    //Serial.print("Motor Speed: ");
+    //Serial.println(motorspeed);
+  }
+  else if (drillspeed < 0 && drillspeed >= -255) {
+    int revq_speed = abs(drillspeed);
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, HIGH);
+    analogWrite(enA, revq_speed);
+    delay(3000);
+    analogWrite(enB, revq_speed);
   }
 }
 }
