@@ -74,7 +74,6 @@ void loop()
     analogWrite(enB, drillspeed);
   }
 
-  /*
   if (drillspeed > 0 && drillspeed <= 255) {
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
@@ -86,5 +85,4 @@ void loop()
     //Serial.print("Motor Speed: ");
     //Serial.println(motorspeed);
   }
-  */
 }
