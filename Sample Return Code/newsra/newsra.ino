@@ -24,7 +24,8 @@
 
 // Solenoid (Use OUT3 and OUT4 on  MotorDriver "B")
 #define Enable_Solenoid 37
-
+#define InputA_Solenoid 38
+#define InputB_Solenoid 39
 // Upper Limit Switch
 #define UpperSwitch 3
 
@@ -37,20 +38,7 @@
 #define SCL 21
 
 
-void setup()
-{
-  Serial.begin(9600);
 
-  pinMode(InputA_Bin, OUTPUT);
-  pinMode(InputB_Bin, OUTPUT);
-  pinMode(InputA_Drill, OUTPUT);
-  pinMode(InputB_Drill, OUTPUT);
-  pinMode(InputA_Elevator, OUTPUT);
-  pinMode(InputB_Elevator, OUTPUT);
-  pinMode(Enable_Solenoid, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(UpperSwitch),blink,CHANGE); //hardware interupt for upper switch
-  attachInterrupt(digitalPinToInterrupt(LowerSwitch),blink,CHANGE); // hardware interupt for lower switch
-}
 
 void blink(){
   stop(); // stops elevator when switch is active
@@ -109,11 +97,11 @@ void SolenoidControl(int i)
 {
   if (i == 0)
   {
-  //The valve will close
+  analogWrite(Enable_Solenoid,255);
   }
   else if (i == 1)
   {
-  // The valve will open
+   analogWrite(Enable_Solenoid,255);
   }
 
 }
@@ -128,11 +116,13 @@ void DrillControl(int i,int j)
  {
    if (i == 1)
    {
-     //turn the drill on
+     digitalWrite(InputA_Drill,LOW);
+     digitalWrite(InputB_Drill,HIGH);
    }
    else
    {
-     //turn off the drill;
+     digitalWrite(InputA_Drill, LOW);
+     digitalWrite(InputB_Drill, LOW);
    }
  }
 
@@ -142,8 +132,8 @@ void DrillControl(int i,int j)
  bins needed to pass in order to get from Bin A to Bin B.
 
  The function also preforms a check on the current status of the liquid
- container servo to determine if is closed or not. If the servo is in its open
- state, ServoControl() will be called to close the servo and recursivley call
+ container servo to determine if is closed or not. If the valve is in its open
+ state, SolenoidControl() will be called to close the valve and recursivley call
  BinControl() again.If the servo is in its closed state, the servo will find
  the mimimum amount of bin changes required to
 
@@ -179,7 +169,8 @@ void ElevatorControl(int i)
   {
   while(UpLimitSwitch != 1)
   {
-   //turn motor up
+   digitalWrite(InputA_Elevator, HIGH);
+   digitalWrite(InputB_Elevator,LOW);
   }
 }
 else if (i = 0)
@@ -188,7 +179,8 @@ else if (i = 0)
  {
   while(DownLimitSwitch != 1)
   {
-  //turn motor down
+    digitalWrite(InputA_Elevator, LOW);
+    digitalWrite(InputB_Elevator,HIGH);
   }
  }
 }
@@ -198,6 +190,18 @@ else if (i = 0)
 
 void setup()
 {
+  Serial.begin(9600);
+  pinMode(InputA_Bin, OUTPUT);
+  pinMode(InputB_Bin, OUTPUT);
+  pinMode(InputA_Drill, OUTPUT);
+  pinMode(InputB_Drill, OUTPUT);
+  pinMode(InputA_Elevator, OUTPUT);
+  pinMode(InputB_Elevator, OUTPUT);
+  pinMode(Enable_Solenoid, OUTPUT);
+  pinMode(UpperSwitch, INPUT);
+  pinMode(LowerSwitch, INPUT);
+  attachInterrupt(digitalPinToInterrupt(UpperSwitch),blink,CHANGE); // hardware interupt for upper switch
+  attachInterrupt(digitalPinToInterrupt(LowerSwitch),blink,CHANGE); // hardware interupt for lower switch
   while(UpLimitSwitch != 1)
   {
     SolenoidControl(home_solenoid);
