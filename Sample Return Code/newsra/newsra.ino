@@ -8,6 +8,8 @@
  *
  * -EMBEDDED TEAM
  */
+
+
 // Drill Motor (Use OUT1 and OUT2 on  MotorDriver "A")
 #define InputA_Drill 30
 #define InputB_Drill 31
@@ -24,8 +26,9 @@
 
 // Solenoid (Use OUT3 and OUT4 on  MotorDriver "B")
 #define Enable_Solenoid 37
-#define InputA_Solenoid 38
-#define InputB_Solenoid 39
+#define InputA_Solenoid 38 //backup
+#define InputB_Solenoid 39 //backup
+
 // Upper Limit Switch
 #define UpperSwitch 3
 
@@ -36,8 +39,6 @@
 // I2C Data Lines
 #define SDA 20
 #define SCL 21
-
-
 
 
 void blink(){
@@ -134,8 +135,8 @@ void DrillControl(int i,int j)
  The function also preforms a check on the current status of the liquid
  container servo to determine if is closed or not. If the valve is in its open
  state, SolenoidControl() will be called to close the valve and recursivley call
- BinControl() again.If the servo is in its closed state, the servo will find
- the mimimum amount of bin changes required to
+ BinControl() again. If the servo is in its closed state, the servo will find
+ the mimimum amount of bin changes required to achive the new bin.
 
 
 
@@ -151,18 +152,10 @@ void BinControl(int i,int j)
   }
   if (j == 0)
   {
-
-    if (forward < backward)
-    {
-    //turn gear left
-    }
-    else
-    {
-    //turn gear right
-    }
+   digitalWrite(InputA_Bin, HIGH);
+   digitalWrite(InputB_Bin, LOW);
   }
 }
-
 void ElevatorControl(int i)
 {
   if (i == 1)
@@ -175,14 +168,11 @@ void ElevatorControl(int i)
 }
 else if (i = 0)
 {
- if (i == 0)
- {
   while(DownLimitSwitch != 1)
   {
     digitalWrite(InputA_Elevator, LOW);
     digitalWrite(InputB_Elevator,HIGH);
   }
- }
 }
 }
 
