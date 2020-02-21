@@ -3,9 +3,9 @@
 
 
 //Elevator Motor Pins
-int enA = 30;
-int in1 = 9;
-int in2 = 8;
+int enA = 38;
+int in1 = 2;
+int in2 = 3;
 // Auger Motor Pins
 int enB = 31;
 int in3 = 7;
@@ -41,11 +41,11 @@ void setup()
 
 void loop()
 {
-  int array[10] = {-200,0,200,0,-200,0,200,0,200,0};
-  for (int i = 0; i < 11; i++)
-  {
-    motorspeed = array[i];
-    drillspeed = array[i];
+  //int array[10] = {-255,0,255,0,-255,0,255,0,255,0};
+  //for (int i = 0; i < 11; i++)
+  //{
+    motorspeed = 255;
+    drillspeed = 255;
   if (motorspeed >= 0 && motorspeed <= 255) {
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
@@ -89,4 +89,4 @@ void loop()
     analogWrite(enB, revq_speed);
   }
 }
-}
+//}

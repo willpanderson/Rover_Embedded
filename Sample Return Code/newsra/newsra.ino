@@ -1,8 +1,6 @@
 #include <Wire.h>
-
+#include <AFMotor.h>
 /*
- *
- *
  * IN DEVELOPMENT, THIS WILL NOT WORK WHATSOEVER
  * General layout for continuing further
  *
@@ -32,7 +30,6 @@
 // Upper Limit Switch
 #define UpperSwitch 3
 
-
 // Lower Limit Switch
 #define LowerSwitch 2
 
@@ -40,9 +37,8 @@
 #define SDA 20
 #define SCL 21
 
-
 void blink(){
-  stop(); // stops elevator when switch is active
+  Stop(); // stops elevator when switch is active
 }
 
 void Stop(){
@@ -98,18 +94,22 @@ void SolenoidControl(int i)
 {
   if (i == 0)
   {
-  analogWrite(Enable_Solenoid,255);
+  digitalWrite(Enable_Solenoid,LOW);
+  digitalWrite(InputA_Solenoid,LOW);
+  digitalWrite(InputB_Solenoid,LOW);
   }
   else if (i == 1)
   {
-   analogWrite(Enable_Solenoid,255);
+   digitalWrite(Enable_Solenoid,HIGH);
+   digitalWrite(InputA_Solenoid,HIGH);
+   digitalWrite(InputB_Solenoid,LOW);
   }
 
 }
 
 void DrillControl(int i,int j)
 {
- if(j == 0 || i == 0)
+ if(j == 0 && i == 0)
  {
   return;
  }
@@ -128,6 +128,7 @@ void DrillControl(int i,int j)
  }
 
 }
+
 /*
  The operation of the bin requires an algorithm to determine the least amount of
  bins needed to pass in order to get from Bin A to Bin B.
@@ -137,8 +138,6 @@ void DrillControl(int i,int j)
  state, SolenoidControl() will be called to close the valve and recursivley call
  BinControl() again. If the servo is in its closed state, the servo will find
  the mimimum amount of bin changes required to achive the new bin.
-
-
 
  */
 void BinControl(int i,int j)
@@ -152,8 +151,8 @@ void BinControl(int i,int j)
   }
   if (j == 0)
   {
-   digitalWrite(InputA_Bin, HIGH);
-   digitalWrite(InputB_Bin, LOW);
+   //digitalWrite(InputA_Bin, HIGH);
+   //digitalWrite(InputB_Bin, LOW);
   }
 }
 void ElevatorControl(int i)
@@ -175,8 +174,8 @@ else if (i = 0)
   }
 }
 }
-
-
+int p = 1;
+int o = 0;
 
 void setup()
 {
@@ -188,21 +187,25 @@ void setup()
   pinMode(InputA_Elevator, OUTPUT);
   pinMode(InputB_Elevator, OUTPUT);
   pinMode(Enable_Solenoid, OUTPUT);
+  pinMode(InputA_Solenoid, OUTPUT);
+  pinMode(InputB_Solenoid, OUTPUT);
+
   pinMode(UpperSwitch, INPUT);
   pinMode(LowerSwitch, INPUT);
-  attachInterrupt(digitalPinToInterrupt(UpperSwitch),blink,CHANGE); // hardware interupt for upper switch
-  attachInterrupt(digitalPinToInterrupt(LowerSwitch),blink,CHANGE); // hardware interupt for lower switch
-  while(UpLimitSwitch != 1)
-  {
-    SolenoidControl(home_solenoid);
-    DrillControl(home_drill,home_elevator);
-    BinControl(home_bin,home_solenoid);
-    ElevatorControl(home_elevator);
-  }
+  //attachInterrupt(digitalPinToInterrupt(UpperSwitch),blink,CHANGE); // hardware interupt for upper switch
+  //attachInterrupt(digitalPinToInterrupt(LowerSwitch),blink,CHANGE); // hardware interupt for lower switch
+  //while(UpLimitSwitch != 1)
+  //{
+    // SolenoidControl(home_solenoid);
+    //DrillControl(home_drill,home_elevator);
+    //BinControl(home_bin,home_solenoid);
+    //ElevatorControl(home_elevator);
+  //}
 }
 
 void loop()
 {
- //ParseData();
+  SolenoidControl(p);
   delay(5000);
+  SolenoidControl(o);
 }
