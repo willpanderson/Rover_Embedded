@@ -38,14 +38,14 @@ void ReverseSwitch()
 
 
 
-int BinByte;  // New Command for Bin Change after Data Parsing
-int PrevBin;  // PrevBin Command for Bin Change algorithm
-int SolenoidByte; // Servo Position for Sample Liquid
-int DrillByte; // New Drill Operation Command byte
-int ElevatorByte; // New Elevator Operation Command byte
+int BinByte;              // New Command for Bin Change after Data Parsing
+int PrevBin;              // PrevBin Command for Bin Change algorithm
+int SolenoidByte;         // Servo Position for Sample Liquid
+int DrillByte;            // New Drill Operation Command byte
+int ElevatorByte;         // New Elevator Operation Command byte
 
-int UpLimitSwitch = 0;  // Upper Limit Switch for Elevator
-int DownLimitSwitch = 1; // Lower Limit Switch for Elevator
+int UpLimitSwitch = 0;    // Upper Limit Switch for Elevator
+int DownLimitSwitch = 1;  // Lower Limit Switch for Elevator
 
 
 /*
@@ -60,9 +60,7 @@ int DownLimitSwitch = 1; // Lower Limit Switch for Elevator
 
   Preprocessors are used due to memory constraints with the
   AT2560 processsor.
-
 */
-
 #define home_bin 0
 #define home_elevator 1
 #define home_drill 0
@@ -108,17 +106,16 @@ void DrillControl(int i, int j) //to do
   }
 }
 
-  /*
+/*
     The operation of the bin requires an algorithm to determine the least amount of
     bins needed to pass in order to get from Bin A to Bin B.
-
+    
     The function also preforms a check on the current status of the liquid
     container servo to determine if is closed or not. If the valve is in its open
     state, SolenoidControl() will be called to close the valve and recursivley call
     BinControl() again. If the servo is in its closed state, the servo will find
     the mimimum amount of bin changes required to achive the new bin.
-
-  */
+*/
 void BinControl(int i, int j) //to do
 {
   if (j == 1)
@@ -166,7 +163,14 @@ void setup()
    attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, LOW);
    Serial.println("Motor test!");
    motor.setSpeed(200);
+
+   //SolenoidControl(home_solenoid);
+   //DrillControl(home_drill,home_elevator);
+   //BinControl(home_bin,home_solenoid);
+   //ElevatorControl(home_elevator);
+   
    motor.run(RELEASE);
+
 }
 
 void loop() 
