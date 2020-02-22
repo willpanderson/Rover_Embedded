@@ -103,8 +103,12 @@ void DrillControl(int i, int j) //to do
 {
   if (j == 0 && i == 0)
   {
+    motor_drill.run(RELEASE); 
+    Serial.println("stop drill"); 
     return;
   }
+
+  else if (
 }
 
   /*
@@ -138,7 +142,6 @@ void ElevatorControl(int i)
     {
       motor_elevator.setSpeed(i);
       Serial.println("running elevtor");
-      
     }
   }
    else if (i == 2)
