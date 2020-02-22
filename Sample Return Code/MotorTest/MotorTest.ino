@@ -12,17 +12,17 @@ AF_DCMotor motor(2);
 #define SDA A4
 #define SCL A5
 
-#define UpperSwitch 7
-#define LowerSwitch 8
+#define UpperSwitch 1
+#define LowerSwitch 2
 #define ChannelA_Bin 4
-#define ChannelB_Bin 5
+#define ChannelB_Bin 7
 
-void blink() {
- Stop(); // stops elevator when switch is active
-}
+int p = 1;
+int o = 0;
+
 
 void Stop() {
-  motor_elevator.run(RELEASE);
+  
   Serial.println("active");
 }
 
@@ -146,16 +146,15 @@ void SolenoidControl(int i)
     }
     
     }
-  int p = 1;
-  int o = 0;
+  
 
 
   void setup() {
     Serial.begin(9600);           // set up Serial library at 9600 bps
     //pinMode(ChannelA_Bin, INPUT);
     //pinMode(ChannelB_Bin, INPUT);
-      //attachInterrupt(digitalPinToInterrupt(UpperSwitch), blink, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LowerSwitch), blink, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(UpperSwitch), Stop, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, LOW);
     Serial.println("Motor test!");
     motor.setSpeed(200);
     motor.run(RELEASE);
