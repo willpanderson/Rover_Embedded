@@ -139,6 +139,7 @@ void ElevatorControl(int i)
     {
       motor_elevator.setSpeed(i);
       Serial.println("running elevtor");
+      
     }
   }
    else if (i == 2)
