@@ -14,7 +14,7 @@ AF_DCMotor motor(2);
 
 #define UpperSwitch 7
 #define ChannelA_Bin 4
-#define ChannelB_Bin 7
+#define ChannelB_Bin 5
 
 int p = 1;
 int o = 0;
