@@ -12,8 +12,7 @@ AF_DCMotor motor(2);
 #define SDA A4
 #define SCL A5
 
-#define UpperSwitch 1
-#define LowerSwitch 2
+#define UpperSwitch 7
 #define ChannelA_Bin 4
 #define ChannelB_Bin 7
 
@@ -80,10 +79,10 @@ void SolenoidControl(int i)
   if (i == 0)
   {
     motor.run(BACKWARD);
-    for (i = 0; i < 255; i++) {
-      motor.setSpeed(i);
+  
+      motor.setSpeed(255);
       Serial.println("running solenoid");
-    }}
+    }
     else if (i == 1)
     {
       motor.run(RELEASE);
@@ -126,10 +125,10 @@ void SolenoidControl(int i)
     if (i == 0)
   {
     motor_elevator.run(BACKWARD);
-    for (i = 0; i < 255; i++) {
-      motor_elevator.setSpeed(i);
+    
+      motor_elevator.setSpeed(255);
       Serial.println("running elevtor");
-    }}
+    }
     else if (i == 2)
     {
       motor_elevator.run(RELEASE);
@@ -154,7 +153,6 @@ void SolenoidControl(int i)
     //pinMode(ChannelA_Bin, INPUT);
     //pinMode(ChannelB_Bin, INPUT);
     attachInterrupt(digitalPinToInterrupt(UpperSwitch), Stop, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, LOW);
     Serial.println("Motor test!");
     motor.setSpeed(200);
     motor.run(RELEASE);
@@ -163,9 +161,9 @@ void SolenoidControl(int i)
   void loop() {
    SolenoidControl(o);
    delay(1000);
-   ElevatorControl(p);
-   delay(7000);
-   ElevatorControl(o);
+   //ElevatorControl(p);
+   //delay(700);
+   //ElevatorControl(o);
    SolenoidControl(p);
    delay(3000);
   }
