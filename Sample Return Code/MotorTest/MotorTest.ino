@@ -18,8 +18,7 @@ AF_DCMotor motor(2);
 #define ChannelA_Bin 4
 #define ChannelB_Bin 7
 
-//global variables to define the states 0 and 1
-int p = 1;  
+int p = 1;
 int o = 0;
 
 
@@ -80,8 +79,6 @@ int z;
     In addition, the solenoid is connected to 2 limit switches: 
     when the limit switches are pressed the motor is turned off
     (second part of the if statement).
-
-    0-closed, Hs    1-open
 */
 void SolenoidControl(int i)
 {
@@ -101,16 +98,13 @@ void SolenoidControl(int i)
 
 }
 
-/*
-  1-on     0-off,hs ->for drill    [i]
-  1-up,hs  0-down   ->for elevator [j]
-*/
 void DrillControl(int i, int j) //to do
 {
   if (j == 0 && i == 0)
   {
     motor_drill.run(RELEASE);
     Serial.println("stop drill");
+    return;
   }
   else if(j == 1 && i == 0)
   {
@@ -134,11 +128,8 @@ void DrillControl(int i, int j) //to do
     for (i = 0; i < 255; i++) {
       motor_elevator.setSpeed(i);
     }
-    Serial.println("elevator moving back up");
-    motor_drill.run(RELEASE);
+    Serial.println("drill moving");
   }
-
-  return;
 }
 
 /*
@@ -150,9 +141,6 @@ void DrillControl(int i, int j) //to do
     state, SolenoidControl() will be called to close the valve and recursivley call
     BinControl() again. If the servo is in its closed state, the servo will find
     the mimimum amount of bin changes required to achive the new bin.
-
-    i = bin, j = elevator
-    0 -bin1,hs 1-Bin2 2-Bin3 and so on
 */
 void BinControl(int i, int j) //to do
 {
@@ -165,9 +153,6 @@ void BinControl(int i, int j) //to do
   }
 }
 
-/*
- * 0-down   1-up, hs
-*/
 void ElevatorControl(int i)
 {
   if (i == 0)
@@ -205,9 +190,9 @@ void setup()
    Serial.println("Motor test!");
    motor.setSpeed(200);
 
-   //SolenoidControl(home_solenoid);         
-   //DrillControl(home_drill,home_elevator);  //i-drill, j-elevator
-   //BinControl(home_bin,home_solenoid);      //i-bin, j-solenoid
+   //SolenoidControl(home_solenoid);
+   //DrillControl(home_drill,home_elevator);
+   //BinControl(home_bin,home_solenoid);
    //ElevatorControl(home_elevator);
    
    motor.run(RELEASE);
@@ -218,14 +203,9 @@ void loop()
 {
    SolenoidControl(o);
    delay(1000);
-   DrillControl(o,p);     //drill, elevator
+   //ElevatorControl(p);
    delay(7000);
-   ElevatorControl(p);
-   delay(7000);
-   ElevatorControl(o);
-   delay(5000);
-   DrillControl(p,o);
-   
+   //ElevatorControl(o);
    SolenoidControl(p);
    delay(3000);
 }
