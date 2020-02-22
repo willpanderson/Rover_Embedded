@@ -102,7 +102,33 @@ void DrillControl(int i, int j) //to do
 {
   if (j == 0 && i == 0)
   {
+    motor_drill.run(RELEASE);
+    Serial.println("stop drill);
     return;
+  }
+  else if(j == 1 && i == 0)
+  {
+    moror_drill.run(FORWARD);
+    for (i = 0; i < 255; i++) {
+      motor_drill.setSpeed(i);
+      Serial.println("drill moving");
+    }
+  }
+  else if(j == 1 && i == 1)
+  {
+    moror_drill.run(FORWARD);
+    for (i = 0; i < 255; i++) {
+      motor_drill.setSpeed(i);
+      Serial.println("drill moving");
+    }
+  }
+  else
+  {
+    moror_elevator.run(BACKWARD);
+    for (i = 0; i < 255; i++) {
+      motor_elevator.setSpeed(i);
+    }
+    Serial.println("drill moving");
   }
 }
 
