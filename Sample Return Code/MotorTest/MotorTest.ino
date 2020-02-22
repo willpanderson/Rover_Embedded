@@ -105,7 +105,6 @@ void DrillControl(int i, int j) //to do
   {
     motor_drill.run(RELEASE); 
     Serial.println("stop drill"); 
-    return;
   }
 
   else if (j == 1 && i == 0)
@@ -129,7 +128,8 @@ void DrillControl(int i, int j) //to do
     motor_elevator.run(BACKWARD);  
     for (int i = 0; i < 255; i++)
       motor_elevator.setSpeed(i); 
-    Serial.println("drill moving ");
+    Serial.println("elevator moving back up");
+    motor_drill.run(RELEASE); 
   }
 }
 
@@ -192,15 +192,24 @@ void setup()
    Serial.println("Motor test!");
    motor.setSpeed(200);
    motor.run(RELEASE);
+
+   //SolenoidControl(home_solenoid); 
+   //DrillControl(home_drill, home_elevator); 
+   //BinControl(home_bin, home_solenoid); 
+   //ElevatorControl(home_elevator); 
 }
 
 void loop() 
 {
    SolenoidControl(o);
    delay(1000);
+   DrillControl(o,p); 
+   delay(7000); 
    ElevatorControl(p);
    delay(7000);
    ElevatorControl(o);
+   delay(5000);
+   DrillControl(p,o);
    SolenoidControl(p);
    delay(3000);
 }
