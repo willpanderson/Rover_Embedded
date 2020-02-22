@@ -12,9 +12,10 @@ AF_DCMotor motor(2);
 #define SDA A4
 #define SCL A5
 
-#define UpperSwitch 7
+#define UpperSwitch 1
+#define LowerSwitch 2
 #define ChannelA_Bin 4
-#define ChannelB_Bin 5
+#define ChannelB_Bin 7
 
 int p = 1;
 int o = 0;
@@ -71,33 +72,40 @@ int DownLimitSwitch = 1; // Lower Limit Switch for Elevator
 int forward;
 int backward;
 
-
-
 int z;
+
+/*
+    The solenoidControl() function below regulates the Solenoid speed,
+    which takes 12V to be powered on (first part of the if statement).
+    In addition, the solenoid is connected to 2 limit switches: 
+    when the limit switches are pressed the motor is turned off
+    (second part of the if statement).
+*/
 void SolenoidControl(int i)
 {
   if (i == 0)
   {
     motor.run(BACKWARD);
-  
-      motor.setSpeed(255);
+    for (i = 0; i < 255; i++) {
+      motor.setSpeed(i);
       Serial.println("running solenoid");
     }
-    else if (i == 1)
-    {
+  }
+  else if (i == 1)
+  {
       motor.run(RELEASE);
       Serial.println("stop");
-    }
-
   }
 
-  void DrillControl(int i, int j)
+}
+
+void DrillControl(int i, int j) //to do
+{
+  if (j == 0 && i == 0)
   {
-    if (j == 0 && i == 0)
-    {
-      return;
-    }
+    return;
   }
+}
 
   /*
     The operation of the bin requires an algorithm to determine the least amount of
@@ -110,60 +118,63 @@ void SolenoidControl(int i)
     the mimimum amount of bin changes required to achive the new bin.
 
   */
-  void BinControl(int i, int j)
+void BinControl(int i, int j) //to do
+{
+  if (j == 1)
   {
-    if (j == 1)
-    {
-      SolenoidControl(home_solenoid);
-      delay(2000);
-      j = 0;
-      BinControl(i, j);
-    }
+    SolenoidControl(home_solenoid);
+    delay(2000);
+    j = 0;
+    BinControl(i, j);
   }
-  void ElevatorControl(int i)
-  {
-    if (i == 0)
+}
+
+void ElevatorControl(int i)
+{
+  if (i == 0)
   {
     motor_elevator.run(BACKWARD);
-    
-      motor_elevator.setSpeed(255);
+    for (i = 0; i < 255; i++) 
+    {
+      motor_elevator.setSpeed(i);
       Serial.println("running elevtor");
     }
-    else if (i == 2)
-    {
+  }
+   else if (i == 2)
+  {
       motor_elevator.run(RELEASE);
       Serial.println("stop");
-    }
-    else if (i == 1)
-    {
-      
+  }
+  else if (i == 1)
+  {
     motor_elevator.run(FORWARD);
-    for (i = 0; i < 255; i++) {
+    for (i = 0; i < 255; i++) 
+    {
       motor_elevator.setSpeed(i);
       Serial.println("running up elevator");
     }
-    }
-    
-    }
-  
-
-
-  void setup() {
-    Serial.begin(9600);           // set up Serial library at 9600 bps
-    //pinMode(ChannelA_Bin, INPUT);
-    //pinMode(ChannelB_Bin, INPUT);
-    attachInterrupt(digitalPinToInterrupt(UpperSwitch), Stop, CHANGE);
-    Serial.println("Motor test!");
-    motor.setSpeed(200);
-    motor.run(RELEASE);
   }
+}
+  
+void setup() 
+{
+   Serial.begin(9600);           // set up Serial library at 9600 bps
+   //pinMode(ChannelA_Bin, INPUT);
+   //pinMode(ChannelB_Bin, INPUT);
+   attachInterrupt(digitalPinToInterrupt(UpperSwitch), Stop, CHANGE);
+   attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, LOW);
+   Serial.println("Motor test!");
+   motor.setSpeed(200);
+   motor.run(RELEASE);
+}
 
-  void loop() {
+void loop() 
+{
    SolenoidControl(o);
    delay(1000);
-   //ElevatorControl(p);
-   //delay(700);
-   //ElevatorControl(o);
+   ElevatorControl(p);
+   delay(7000);
+   ElevatorControl(o);
    SolenoidControl(p);
    delay(3000);
-  }
+}
