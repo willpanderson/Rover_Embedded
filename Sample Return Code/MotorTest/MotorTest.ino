@@ -3,6 +3,7 @@
 // this code is public domain, enjoy!
 
 #include <AFMotor.h>
+#include <Wire.h>
 
 AF_DCMotor motor_drill(1);
 AF_DCMotor motor_elevator(4);
@@ -27,13 +28,15 @@ void Stop() {
   Serial.println("active");
 }
 
-void ReverseSwitch()
+void DataParse()
 {
-
+ 
 }
-
-
-// need to place a data parsing function for the I2C line
+void DataSend()
+{
+  
+}
+// need to place a data parsing and a sending function for the I2C line
 
 
 
@@ -102,12 +105,10 @@ void DrillControl(int i, int j) //to do
 {
   if (j == 0 && i == 0)
   {
-    motor_drill.run(RELEASE); 
-    Serial.println("stop drill"); 
     return;
   }
 
-  else if (j == 1 && i == 0)
+  if (j == 1) && i == 0)
   {
     motor_drill.run(FORWARD); 
     for (int i = 0; i < 255; i++)
@@ -144,7 +145,43 @@ void DrillControl(int i, int j) //to do
 */
 void BinControl(int i, int j) //to do
 {
-  if (j == 1)
+  if (j == 0)
+  {
+    motor_bin.run(FORWARD);
+    if (i == 0)
+    {
+     motor_bin.setSpeed(255);
+    }
+    else if (i == 1)
+    {
+     motor_bin.setSpeed(250);
+    }
+    else if (i == 2)
+    {
+     motor_bin.setSpeed(245);
+    }
+    else if (i == 3)
+    {
+     motor_bin.setSpeed(240);
+    }
+    else if (i == 4)
+    {
+     motor_bin.setSpeed(235);
+    }
+    else if (i == 5)
+    {
+     motor_bin.setSpeed(230);
+    }
+    else if (i == 6)
+    {
+     motor_bin.setSpeed(225);
+    }
+    else if (i == 7)
+    {
+     motor_bin.setSpeed(220);
+    }
+  }
+  else if (j == 1)
   {
     SolenoidControl(home_solenoid);
     delay(2000);
@@ -201,6 +238,7 @@ void setup()
 
 void loop() 
 {
+  //DataParse();
    SolenoidControl(o);
    delay(1000);
    ElevatorControl(p);
