@@ -28,8 +28,11 @@ VI. Rules and Requirements
   -> Folder containing all the rules and regulations for the 2019-2020 
      MARS ROVER Competition guidelines and requirements. This folder also
      contains all the product backlogs and requirements for this DevTeam
-     
-VII. Useful Diagrams
+
+VII. Sample Return Code
+  ->Folder containing all the .ino files needed for the Sample Return Module
+  
+VIII. Useful Diagrams
   -> Folder containing the diagrams of all Arduino-related systems, 
      electrical diagrams, and etc. 
      
