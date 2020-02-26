@@ -108,7 +108,7 @@ void DrillControl(int i, int j) //to do
     return;
   }
 
-  if (j == 1) && i == 0)
+  if (j == 1 && i == 0)
   {
     motor_drill.run(FORWARD); 
     for (int i = 0; i < 255; i++)
