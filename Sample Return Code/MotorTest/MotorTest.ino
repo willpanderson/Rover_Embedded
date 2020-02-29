@@ -44,8 +44,8 @@ int z;
 #define SDA A4
 #define SCL A5
 
-#define UpperSwitch 1
-#define LowerSwitch 2
+#define UpperSwitch 2
+#define LowerSwitch 3
 #define ChannelA_Bin 4
 #define ChannelB_Bin 7
 
@@ -64,8 +64,8 @@ byte DataParse(byte IncomingData[3], byte OutgoingData[3])
  {
  ElevatorByte = IncomingData[0];
  DrillByte = IncomingData[1];
- PrevBin = binByte;
- binByte = IncomingData[2];
+ PrevBin = BinByte;
+ BinByte = IncomingData[2];
  SolenoidByte = IncomingData[3];
  }
  
@@ -77,7 +77,7 @@ byte DataParse(byte IncomingData[3], byte OutgoingData[3])
 
  OutgoingData[0] = ElevatorByte;
  OutgoingData[1] = DrillByte;
- OutgoingData[2] = binByte;
+ OutgoingData[2] = BinByte;
  OutgoingData[3] = SolenoidByte;
 
  return OutgoingData;
