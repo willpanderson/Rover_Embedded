@@ -1,6 +1,4 @@
-// Adafruit Motor shield library
-// copyright Adafruit Industries LLC, 2009
-// this code is public domain, enjoy!
+
 
 #include <AFMotor.h>
 #include <Wire.h>
@@ -9,36 +7,8 @@ AF_DCMotor motor_drill(1);
 AF_DCMotor motor_elevator(4);
 AF_DCMotor motor_bin(3);
 AF_DCMotor motor(2);
-
-
-#define SDA A4
-#define SCL A5
-
-#define UpperSwitch 1
-#define LowerSwitch 2
-#define ChannelA_Bin 4
-#define ChannelB_Bin 7
-
-int p = 1;
-int o = 0;
-
-
-void Stop() {
-  
-  Serial.println("active");
-}
-
-void DataParse()
-{
- 
-}
-void DataSend()
-{
-  
-}
-// need to place a data parsing and a sending function for the I2C line
-
-
+static byte IncomingData[64];
+static byte OutgoingData[64];
 
 
 int BinByte;              // New Command for Bin Change after Data Parsing
@@ -68,18 +38,57 @@ int DownLimitSwitch = 1;  // Lower Limit Switch for Elevator
 #define home_elevator 1
 #define home_drill 0
 #define home_solenoid 0
-
-
-
 int forward;
 int backward;
-
 int z;
+#define SDA A4
+#define SCL A5
+
+#define UpperSwitch 1
+#define LowerSwitch 2
+#define ChannelA_Bin 4
+#define ChannelB_Bin 7
+
+int p = 1;
+int o = 0;
+
+
+void Stop() {
+
+  Serial.println("active");
+}
+
+byte DataParse(byte IncomingData[3], byte OutgoingData[3])
+{
+ if (IncomingData != NULL)
+ {
+ ElevatorByte = IncomingData[0];
+ DrillByte = IncomingData[1];
+ PrevBin = binByte;
+ binByte = IncomingData[2];
+ SolenoidByte = IncomingData[3];
+ }
+ ElevatorControl(ElevatorByte);
+ DrillControl(DrillByte,ElevatorByte);
+ BinControl(BinControl,SolenoidByte);
+ SolenoidControl(SolenoidByte);
+
+
+ OutgoingData[0] = ElevatorByte;
+ OutgoingData[1] = DrillByte;
+ OutgoingData[2] = binByte;
+ OutgoingData[3] = SolenoidByte;
+
+ return OutgoingData;
+}
+
+
+
 
 /*
     The solenoidControl() function below regulates the Solenoid speed,
     which takes 12V to be powered on (first part of the if statement).
-    In addition, the solenoid is connected to 2 limit switches: 
+    In addition, the solenoid is connected to 2 limit switches:
     when the limit switches are pressed the motor is turned off
     (second part of the if statement).
 */
@@ -110,25 +119,25 @@ void DrillControl(int i, int j) //to do
 
   if (j == 1 && i == 0)
   {
-    motor_drill.run(FORWARD); 
+    motor_drill.run(FORWARD);
     for (int i = 0; i < 255; i++)
-      motor_drill.setSpeed(i); 
-    Serial.println("drill moving"); 
+      motor_drill.setSpeed(i);
+    Serial.println("drill moving");
   }
 
   else if (j == 1 && i == 1)
   {
-    motor_drill.run(FORWARD); 
+    motor_drill.run(FORWARD);
     for (int i = 0; i < 255; i++)
-      motor_drill.setSpeed(i); 
+      motor_drill.setSpeed(i);
     Serial.println("drill moving");
   }
 
-  else 
+  else
   {
-    motor_elevator.run(BACKWARD);  
+    motor_elevator.run(BACKWARD);
     for (int i = 0; i < 255; i++)
-      motor_elevator.setSpeed(i); 
+      motor_elevator.setSpeed(i);
     Serial.println("drill moving ");
   }
 }
@@ -136,7 +145,7 @@ void DrillControl(int i, int j) //to do
 /*
     The operation of the bin requires an algorithm to determine the least amount of
     bins needed to pass in order to get from Bin A to Bin B.
-    
+
     The function also preforms a check on the current status of the liquid
     container servo to determine if is closed or not. If the valve is in its open
     state, SolenoidControl() will be called to close the valve and recursivley call
@@ -195,7 +204,7 @@ void ElevatorControl(int i)
   if (i == 0)
   {
     motor_elevator.run(BACKWARD);
-    for (i = 0; i < 255; i++) 
+    for (i = 0; i < 255; i++)
     {
       motor_elevator.setSpeed(i);
       Serial.println("running elevtor");
@@ -209,15 +218,15 @@ void ElevatorControl(int i)
   else if (i == 1)
   {
     motor_elevator.run(FORWARD);
-    for (i = 0; i < 255; i++) 
+    for (i = 0; i < 255; i++)
     {
       motor_elevator.setSpeed(i);
       Serial.println("running up elevator");
     }
   }
 }
-  
-void setup() 
+
+void setup()
 {
    Serial.begin(9600);           // set up Serial library at 9600 bps
    //pinMode(ChannelA_Bin, INPUT);
@@ -231,12 +240,12 @@ void setup()
    //DrillControl(home_drill,home_elevator);
    //BinControl(home_bin,home_solenoid);
    //ElevatorControl(home_elevator);
-   
-   motor.run(RELEASE);
 
+   motor.run(RELEASE);
+   Serial.println("Sample Return Module 2020 is active.");
 }
 
-void loop() 
+void loop()
 {
   //DataParse();
    SolenoidControl(o);
