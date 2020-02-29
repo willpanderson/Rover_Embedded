@@ -55,7 +55,8 @@ int o = 0;
 
 void Stop() {
 
-  Serial.println("active");
+  Serial.println("stop active");
+  Elevator
 }
 
 byte DataParse(byte IncomingData[3], byte OutgoingData[3])
@@ -230,10 +231,12 @@ void ElevatorControl(int i)
 void setup()
 {
    Serial.begin(9600);           // set up Serial library at 9600 bps
-   //pinMode(ChannelA_Bin, INPUT);
-   //pinMode(ChannelB_Bin, INPUT);
+   pinMode(ChannelA_Bin, INPUT);
+   pinMode(ChannelB_Bin, INPUT);
+   pinMode(UpperSwitch, INPUT_PULLUP);
+   pinMode(LowerSwitch, INPUT_PULLUP);
    attachInterrupt(digitalPinToInterrupt(UpperSwitch), Stop, CHANGE);
-   attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, LOW);
+   attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, CHANGE);
    Serial.println("Motor test!");
    motor.setSpeed(200);
 
