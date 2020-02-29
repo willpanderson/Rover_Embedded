@@ -51,12 +51,23 @@ int z;
 
 int p = 1;
 int o = 0;
-
+volatile boolean interrupt_on = false; 
 
 void Stop() {
 
-  Serial.println("stop active");
-  Elevator
+  if (interrupt_on == true) //turn interrupt off
+  {
+    digitalWrite(LowerSwitch, LOW); 
+    interrupt_on = false; 
+  }
+
+  else //turn interrupt on
+  {
+    digitalWrite(UpperSwitch, HIGH); 
+    motor_elevator.run(RELEASE);
+    Serial.println("stop");
+    interrupt_on = false; 
+  }
 }
 
 byte DataParse(byte IncomingData[3], byte OutgoingData[3])
@@ -233,10 +244,10 @@ void setup()
    Serial.begin(9600);           // set up Serial library at 9600 bps
    pinMode(ChannelA_Bin, INPUT);
    pinMode(ChannelB_Bin, INPUT);
-   pinMode(UpperSwitch, INPUT_PULLUP);
-   pinMode(LowerSwitch, INPUT_PULLUP);
+   pinMode(UpperSwitch, INPUT);
+   //pinMode(LowerSwitch, INPUT_PULLUP);
    attachInterrupt(digitalPinToInterrupt(UpperSwitch), Stop, CHANGE);
-   attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, CHANGE);
+   //attachInterrupt(digitalPinToInterrupt(LowerSwitch), Stop, CHANGE);
    Serial.println("Motor test!");
    motor.setSpeed(200);
 
@@ -252,8 +263,8 @@ void setup()
 void loop()
 {
   //DataParse();
-   SolenoidControl(o);
-   delay(1000);
+   //SolenoidControl(o);
+   //delay(1000);
    ElevatorControl(p);
    delay(7000);
    ElevatorControl(o);
