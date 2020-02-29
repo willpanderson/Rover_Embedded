@@ -68,6 +68,7 @@ byte DataParse(byte IncomingData[3], byte OutgoingData[3])
  binByte = IncomingData[2];
  SolenoidByte = IncomingData[3];
  }
+ 
  ElevatorControl(ElevatorByte);
  DrillControl(DrillByte,ElevatorByte);
  BinControl(BinControl,SolenoidByte);
